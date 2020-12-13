@@ -89,9 +89,7 @@ interface NodeProps {
 	uid: Uid
 }
 
-const Node : React.FC<NodeProps> = ({ children, uid }) => {
-	const { getPosition, dispatch } = useContext(GraphContext);
-	const {x, y } = getPosition!(uid);
+const useDraggable = (onDragDone : Function) => {
 	const [dragging, setDragging ] = useState({
 		dragging: false,
 		initial: { x: 0, y: 0 },
@@ -123,11 +121,7 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 	};
 	const onMouseUp = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		if(dragging.dragging) {
-			dispatch!(updatePosition(
-				uid,
-				x + dragging.current.x - dragging.initial.x,
-				y + dragging.current.y - dragging.initial.y
-			));
+			onDragDone();
 			setDragging({
 				dragging: false,
 				initial: {
@@ -142,8 +136,26 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 		}
 	};
 
-	const left = x + dragging.current.x - dragging.initial.x;
-	const top =  y + dragging.current.y - dragging.initial.y;
+	const dragged = {
+		x: dragging.current.x - dragging.initial.x,
+		y: dragging.current.y - dragging.initial.y,
+	}
+
+	return { dragged, onMouseDown, onMouseMove, onMouseUp, };
+};
+
+const Node : React.FC<NodeProps> = ({ children, uid }) => {
+	const { getPosition, dispatch } = useContext(GraphContext);
+	const { x, y } = getPosition!(uid);
+	const { dragged, onMouseDown, onMouseMove, onMouseUp } = useDraggable(() => {
+		dispatch!(updatePosition(
+			uid,
+			x + dragged.x,
+			y + dragged.y,
+		));
+	});
+	const left = x + dragged.x;
+	const top =  y + dragged.y;
 
 	return <div style={{
 		position: 'absolute',
