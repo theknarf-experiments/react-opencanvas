@@ -58,12 +58,76 @@ const graphReducer = (state : Graph, action: Actions) => {
 
 const updatePosition = (uid: Uid, x: Number, y: Number) => ({ type: ActionType.UpdatePosition, uid, x, y });
 
+interface BackgroundGraphProps {
+	vertical: number[];
+	horizontal: number[];
+	width: number;
+	height: number;
+};
+
+/*
+ *	Repeats an array a number of times
+ *
+ *  Example:
+ *    repeatArray([1, 2, 3], 2); // Result: [1, 2, 3, 1, 2, 3]
+ */
+const repeatArray = (array : any[], times : number) =>
+	'.'.repeat(times).split('').flatMap(() => array);
+
+const BackgroundGraph : React.FC<BackgroundGraphProps> = ({ vertical, horizontal, width, height }) => {
+	const viewBox = `0 0 ${width} ${height}`;
+	const sumVertical   = vertical.reduce((a,b) => a+b, 0);
+	const sumHorizontal = horizontal.reduce((a,b) => a+b, 0);
+
+	// Repeat horizontal and vertical lines until they fill the width and height
+	vertical   = repeatArray(vertical, width / sumVertical + 1)
+	horizontal = repeatArray(horizontal, height / sumHorizontal + 1)
+
+	const verticalPath = vertical.reduce(
+		({x, pathCommand}, moveRightBy) => {
+			const newX = x+moveRightBy;
+			const newLine = `M${newX},0 V${height} `;
+
+			return {
+				x: newX,
+				pathCommand: pathCommand+newLine
+			};
+		},
+		{x: 0, pathCommand: ''}
+	).pathCommand;
+
+	const horizontalPath = horizontal.reduce(
+		({y, pathCommand}, moveDownBy) => {
+			const newY = y+moveDownBy;
+			const newLine = `M0,${newY} H${width} `;
+
+			return {
+				y: newY,
+				pathCommand: pathCommand+newLine
+			};
+		},
+		{y: 0, pathCommand: ''}
+	).pathCommand;
+
+	return <svg xmlns="http://www.w3.org/2000/svg" viewBox={viewBox}>
+		<path stroke='#3c529e' d={verticalPath + horizontalPath} />
+	</svg>;
+};
+
+type Color = string;
+
 interface GraphComponentProps {
-	width: Number,
-	height: Number,
+	width: number,
+	height: number,
+	background?: Color,
 }
 
-const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, height }) => {
+const GraphComponent : React.FC<GraphComponentProps> = ({
+	children,
+	width,
+	height,
+	background = '#1c2e60'
+}) => {
 	const ref = useRef(null);
 	const [state, dispatch] = useReducer(graphReducer, initialState);
 	const getPosition = (uid: Uid) => {
@@ -81,14 +145,20 @@ const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, heigh
 		<div style={{
 			width: `${width}px`,
 			height: `${height}px`,
-			backgroundColor: 'darkblue',
+			backgroundColor: background,
 			color: '#eaeaea',
 			position: 'relative',
 			overflow: 'hidden',
 		}}
 		ref={ref}
 		>
-		{children}
+			<BackgroundGraph
+				height={height}
+				width={width}
+				vertical={[50, 10, 10, 10]}
+				horizontal={[50, 10, 10, 10]}
+				/>
+			{children}
 		</div>
 	</GraphContext.Provider>
 };
