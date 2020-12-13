@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Graph, { useNode } from './components/graph';
+import Graph, { useNode } from './graph';
 
 const GenericNode1 : React.FC = () => {
 	const { Node } = useNode();	

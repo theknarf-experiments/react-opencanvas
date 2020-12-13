@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useReducer, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useRef } from 'react';
 import { useUID } from 'react-uid';
+import useDraggable from './useDraggable';
 
 interface Graph {
 	nodes: any[];
@@ -95,77 +96,6 @@ const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, heigh
 interface NodeProps {
 	uid: Uid
 }
-
-const useDraggable = (ref: { current: any }, onDragDone : Function) => {
-	const [dragging, setDragging ] = useState({
-		dragging: false,
-		initial: { x: 0, y: 0 },
-		current: { x: 0, y: 0 },
-	});
-	const onMouseDown = (e : React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		setDragging({
-			dragging: true,
-			initial: {
-				x: e.clientX,
-				y: e.clientY,
-			},
-			current: {
-				x: e.clientX,
-				y: e.clientY,
-			}
-		})
-	};
-	const onMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		if(dragging.dragging) {
-			setDragging({
-				...dragging,
-				current: {
-					x: e.clientX,
-					y: e.clientY,
-				}
-			});
-		}
-	};
-	const onMouseUp = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		if(dragging.dragging) {
-			onDragDone();
-			setDragging({
-				dragging: false,
-				initial: {
-					x: 0,
-					y: 0,
-				},
-				current: {
-					x: 0,
-					y: 0,
-				}
-			});
-		}
-	};
-
-	useEffect(() => {
-		var currentRef : any = null;
-		if(ref.current) {
-			currentRef = ref.current;
-			currentRef.addEventListener('mousemove', onMouseMove);
-			currentRef.addEventListener('mouseup', onMouseUp);
-		}
-
-		return () => {
-			if(currentRef) {
-				currentRef.removeEventListener('mousemove', onMouseMove);
-				currentRef.removeEventListener('mouseup', onMouseUp);
-			}
-		}
-	});
-
-	const dragged = {
-		x: dragging.current.x - dragging.initial.x,
-		y: dragging.current.y - dragging.initial.y,
-	}
-
-	return { dragged, onMouseDown };
-};
 
 const Node : React.FC<NodeProps> = ({ children, uid }) => {
 	const { getPosition, dispatch, ref } = useContext(GraphContext);
