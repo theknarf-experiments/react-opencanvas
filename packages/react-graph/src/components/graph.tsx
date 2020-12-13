@@ -72,7 +72,8 @@ const GraphComponent : React.FC = ({ children }) => {
 			height: '500px',
 			backgroundColor: 'darkblue',
 			color: '#eaeaea',
-			position: 'relative'
+			position: 'relative',
+			overflow: 'hidden',
 		}}>
 		{children}
 		</div>
@@ -142,7 +143,9 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 	return <div style={{
 		position: 'absolute',
 		border: '1px solid black',
+		background: 'black',
 		padding: '10px',
+		userSelect: 'none',
 		left: `${left}px`,
 		top: `${top}px`,
 		width: `${width}px`,
