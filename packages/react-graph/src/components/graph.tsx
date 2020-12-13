@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useState } from 'react';
+import React, { createContext, useContext, useReducer, useState, useRef, useEffect } from 'react';
 import { useUID } from 'react-uid';
 
 interface Graph {
@@ -15,7 +15,10 @@ const GraphContext = createContext<{
 	state?: Graph;
 	dispatch?: Function;
 	getPosition?: Function;
-}>({});
+	ref: { current: any };
+}>({
+	ref: { current: null }
+});
 
 enum ActionType {
 	UpdatePosition,
@@ -60,6 +63,7 @@ interface GraphComponentProps {
 }
 
 const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, height }) => {
+	const ref = useRef(null);
 	const [state, dispatch] = useReducer(graphReducer, initialState);
 	const getPosition = (uid: Uid) => {
 		const node = state.nodes.find((node) => node.uid === uid);
@@ -71,6 +75,7 @@ const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, heigh
 		state,
 		dispatch,
 		getPosition,
+		ref,
 	}}>
 		<div style={{
 			width: `${width}px`,
@@ -79,7 +84,9 @@ const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, heigh
 			color: '#eaeaea',
 			position: 'relative',
 			overflow: 'hidden',
-		}}>
+		}}
+		ref={ref}
+		>
 		{children}
 		</div>
 	</GraphContext.Provider>
@@ -89,7 +96,7 @@ interface NodeProps {
 	uid: Uid
 }
 
-const useDraggable = (onDragDone : Function) => {
+const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 	const [dragging, setDragging ] = useState({
 		dragging: false,
 		initial: { x: 0, y: 0 },
@@ -136,18 +143,34 @@ const useDraggable = (onDragDone : Function) => {
 		}
 	};
 
+	useEffect(() => {
+		var currentRef : any = null;
+		if(ref.current) {
+			currentRef = ref.current;
+			currentRef.addEventListener('mousemove', onMouseMove);
+			currentRef.addEventListener('mouseup', onMouseUp);
+		}
+
+		return () => {
+			if(currentRef) {
+				currentRef.removeEventListener('mousemove', onMouseMove);
+				currentRef.removeEventListener('mouseup', onMouseUp);
+			}
+		}
+	});
+
 	const dragged = {
 		x: dragging.current.x - dragging.initial.x,
 		y: dragging.current.y - dragging.initial.y,
 	}
 
-	return { dragged, onMouseDown, onMouseMove, onMouseUp, };
+	return { dragged, onMouseDown };
 };
 
 const Node : React.FC<NodeProps> = ({ children, uid }) => {
-	const { getPosition, dispatch } = useContext(GraphContext);
+	const { getPosition, dispatch, ref } = useContext(GraphContext);
 	const { x, y } = getPosition!(uid);
-	const { dragged, onMouseDown, onMouseMove, onMouseUp } = useDraggable(() => {
+	const { dragged, onMouseDown } = useDraggable(ref, () => {
 		dispatch!(updatePosition(
 			uid,
 			x + dragged.x,
@@ -165,8 +188,6 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 		top: `${top}px`,
 	}}
 	onMouseDown={onMouseDown}
-	onMouseMove={onMouseMove}
-	onMouseUp={onMouseUp}
 	>
 		<span>Uuid: {uid}</span>
 		<div>{children}</div>
