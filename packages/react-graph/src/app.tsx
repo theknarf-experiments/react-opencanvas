@@ -5,7 +5,9 @@ const GenericNode1 : React.FC = () => {
 	const { Node } = useNode();	
 
 	return <Node>
+		<div style={{ padding: '20px'}}>
 		generic node type 1	
+		</div>
 	</Node>
 }
 
@@ -13,7 +15,9 @@ const GenericNode2 : React.FC = () => {
 	const { Node } = useNode();	
 
 	return <Node>
+		<div style={{ padding: '20px'}}>
 		generic node type 2	
+		</div>
 	</Node>
 }
 
@@ -24,7 +28,7 @@ const App : React.FC = () => {
 	};
 
 	return <div>
-		<Graph>
+		<Graph width={1200} height={500}>
 			<GenericNode1 />
 			<GenericNode2 />
 			{

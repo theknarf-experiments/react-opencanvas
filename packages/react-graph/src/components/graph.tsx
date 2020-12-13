@@ -54,11 +54,16 @@ const graphReducer = (state : Graph, action: Actions) => {
 
 const updatePosition = (uid: Uid, x: Number, y: Number) => ({ type: ActionType.UpdatePosition, uid, x, y });
 
-const GraphComponent : React.FC = ({ children }) => {
+interface GraphComponentProps {
+	width: Number,
+	height: Number,
+}
+
+const GraphComponent : React.FC<GraphComponentProps> = ({ children, width, height }) => {
 	const [state, dispatch] = useReducer(graphReducer, initialState);
 	const getPosition = (uid: Uid) => {
 		const node = state.nodes.find((node) => node.uid === uid);
-		const defaultValues = { x: 0, y: 0, width: 200, height: 200 };
+		const defaultValues = { x: 0, y: 0 };
 		return { ...defaultValues, ...node };
 	}
 
@@ -68,8 +73,8 @@ const GraphComponent : React.FC = ({ children }) => {
 		getPosition,
 	}}>
 		<div style={{
-			width: '1200px',
-			height: '500px',
+			width: `${width}px`,
+			height: `${height}px`,
 			backgroundColor: 'darkblue',
 			color: '#eaeaea',
 			position: 'relative',
@@ -86,7 +91,7 @@ interface NodeProps {
 
 const Node : React.FC<NodeProps> = ({ children, uid }) => {
 	const { getPosition, dispatch } = useContext(GraphContext);
-	const {x, y, width, height } = getPosition!(uid);
+	const {x, y } = getPosition!(uid);
 	const [dragging, setDragging ] = useState({
 		dragging: false,
 		initial: { x: 0, y: 0 },
@@ -142,14 +147,10 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 
 	return <div style={{
 		position: 'absolute',
-		border: '1px solid black',
 		background: 'black',
-		padding: '10px',
 		userSelect: 'none',
 		left: `${left}px`,
 		top: `${top}px`,
-		width: `${width}px`,
-		height: `${height}px`,
 	}}
 	onMouseDown={onMouseDown}
 	onMouseMove={onMouseMove}
