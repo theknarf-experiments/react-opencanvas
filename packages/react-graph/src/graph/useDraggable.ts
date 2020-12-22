@@ -9,17 +9,20 @@ const initialState = {
 const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 	const [dragging, setDragging] = useState(initialState);
 	const onMouseDown = (e : React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-		setDragging({
-			dragging: true,
-			initial: {
-				x: e.clientX,
-				y: e.clientY,
-			},
-			current: {
-				x: e.clientX,
-				y: e.clientY,
-			}
-		})
+		// Only drag on left click
+		if(e.button === 0) {
+			setDragging({
+				dragging: true,
+				initial: {
+					x: e.clientX,
+					y: e.clientY,
+				},
+				current: {
+					x: e.clientX,
+					y: e.clientY,
+				}
+			})
+		}
 	};
 	const onMouseMove = (e: MouseEvent) => {
 		if(dragging.dragging) {
