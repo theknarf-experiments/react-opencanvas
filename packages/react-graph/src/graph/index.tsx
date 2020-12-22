@@ -127,15 +127,13 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 
 	return <div style={{
 		position: 'absolute',
-		background: 'black',
 		userSelect: 'none',
 		left: `${left}px`,
 		top: `${top}px`,
 	}}
 	onMouseDown={onMouseDown}
 	>
-		<span>Uuid: {uid}</span>
-		<div>{children}</div>
+	{children}
 	</div>
 };
 
@@ -144,6 +142,7 @@ export const useNode = () => {
 	//const context = useContext(GraphContext);
 
 	return {
+		uid,
 		Node: ({ ...args }) => <Node uid={uid} {...args} />,
 		//setData: (key, value) => 
 	};

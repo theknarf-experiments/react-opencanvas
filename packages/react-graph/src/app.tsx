@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import Graph, { useNode } from './graph';
 
 const GenericNode1 : React.FC = () => {
-	const { Node } = useNode();	
+	const { Node, uid } = useNode();	
 
 	return <Node>
-		<div style={{ padding: '20px'}}>
-		generic node type 1	
+		<div style={{ background: 'black' }}>
+			<span>Uid: {uid}</span>
+			<div style={{ padding: '20px'}}>
+			generic node type 1	
+			</div>
 		</div>
 	</Node>
 }
@@ -14,16 +17,19 @@ const GenericNode1 : React.FC = () => {
 const GenericNode2 : React.FC<{
 	onClose?: Function
 }> = ({ onClose }) => {
-	const { Node } = useNode();	
+	const { Node, uid } = useNode();	
 	const onClick = () => {
 		if(typeof onClose === 'function')
 			onClose();
 	}
 
 	return <Node>
-		<div style={{ padding: '20px'}}>
-		generic node type 2	
-		<button onClick={onClick}>Close</button>
+		<div style={{ background: '#003' }}>
+			<span>Uid: {uid}</span>
+			<div style={{ padding: '20px'}}>
+				generic node type 2	
+				<button onClick={onClick}>Close</button>
+			</div>
 		</div>
 	</Node>
 }
