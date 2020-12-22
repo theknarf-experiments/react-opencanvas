@@ -1,6 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-const initialState = {
+interface Vector {
+	x: number,
+	y: number,
+};
+
+interface DraggableInterface {
+	dragging: boolean;
+	initial: Vector;
+	current: Vector;
+}
+
+const initialState : DraggableInterface = {
 	dragging: false,
 	initial: { x: 0, y: 0 },
 	current: { x: 0, y: 0 },
@@ -8,6 +19,11 @@ const initialState = {
 
 const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 	const [dragging, setDragging] = useState(initialState);
+	const dragged = useMemo<Vector>(() => ({
+		x: dragging.current.x - dragging.initial.x,
+		y: dragging.current.y - dragging.initial.y,
+	}), [dragging]);
+
 	const onMouseDown = (e : React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		// Only drag on left click
 		if(e.button === 0) {
@@ -37,7 +53,7 @@ const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 	};
 	const onMouseUp = (e: MouseEvent) => {
 		if(dragging.dragging) {
-			onDragDone();
+			onDragDone(dragged);
 			setDragging(initialState);
 		}
 	};
@@ -57,11 +73,6 @@ const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 			}
 		}
 	});
-
-	const dragged = {
-		x: dragging.current.x - dragging.initial.x,
-		y: dragging.current.y - dragging.initial.y,
-	}
 
 	return { dragged, onMouseDown };
 };

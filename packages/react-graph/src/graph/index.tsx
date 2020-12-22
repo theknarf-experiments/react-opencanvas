@@ -23,7 +23,7 @@ const GraphContext = createContext<{
 });
 
 enum ActionType {
-	UpdatePosition,
+	UpdateRelativePosition,
 	UpdateAttribute,
 	AddEdge,
 	RemoveEdge,
@@ -32,20 +32,20 @@ enum ActionType {
 type Uid = string;
 
 type Actions =
- | { type: ActionType.UpdatePosition, uid: Uid, x: Number, y: Number }
+ | { type: ActionType.UpdateRelativePosition, uid: Uid, x: Number, y: Number }
  | { type: ActionType.UpdateAttribute, uid: Uid, key: String, value: any }
  | { type: ActionType.AddEdge, fromNode: Uid, toNode: Uid };
 
 const graphReducer = (state : Graph, action: Actions) => {
 	switch(action.type) {
-		case ActionType.UpdatePosition:
+		case ActionType.UpdateRelativePosition:
 			const newState = { ...state };
 			const index = state.nodes.findIndex((node) => node.uid === action.uid);
 			if(index === -1) {
 				newState.nodes.push({uid: action.uid, x: action.x, y: action.y});
 			} else {
-				newState.nodes[index].x = action.x;
-				newState.nodes[index].y = action.y;
+				newState.nodes[index].x += action.x;
+				newState.nodes[index].y += action.y;
 			}
 			return newState;
 		case ActionType.UpdateAttribute:
@@ -57,7 +57,7 @@ const graphReducer = (state : Graph, action: Actions) => {
 	return state;
 };
 
-const updatePosition = (uid: Uid, x: Number, y: Number) => ({ type: ActionType.UpdatePosition, uid, x, y });
+const updatePosition = (uid: Uid, x: Number, y: Number) => ({ type: ActionType.UpdateRelativePosition, uid, x, y });
 
 type Color = string;
 
@@ -133,29 +133,24 @@ const Node : React.FC<NodeProps> = ({ children, uid, dragged }) => {
 export const useNode = () => {
 	const uid = useUID();
 
-	// Dragable
-	const { getPosition, dispatch, ref } = useContext(GraphContext);
-	const { x, y } = getPosition!(uid);
-	const { dragged, onMouseDown } = useDraggable(ref, () => {
+	// Draggable
+	const { dispatch, ref } = useContext(GraphContext);
+	const { dragged, onMouseDown } = useDraggable(ref, (dragged : { x: number, y: number}) => {
 		dispatch!(updatePosition(
 			uid,
-			x + dragged.x,
-			y + dragged.y,
+			dragged.x,
+			dragged.y,
 		));
 	});
 
-	const Draggable : React.FC<{ uid: Uid }> = ({ children }) => {
-		return <div onMouseDown={onMouseDown}>
-		{children}
-		</div>
-	};
-
+	const Draggable : React.FC = ({ children }) => (
+		<div onMouseDown={onMouseDown}>{children}</div>
+	);
 
 	return {
 		uid,
 		Node: ({ ...args }) => <Node uid={uid} dragged={dragged} {...args} />,
-		Draggable: ({ ...args }) => <Draggable uid={uid} {...args} />,
-		//setData: (key, value) => 
+		Draggable,
 	};
 }
 
