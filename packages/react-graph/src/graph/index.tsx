@@ -109,19 +109,13 @@ const GraphComponent : React.FC<GraphComponentProps> = ({
 };
 
 interface NodeProps {
-	uid: Uid
+	uid: Uid;
+	dragged: { x: number, y: number };
 }
 
-const Node : React.FC<NodeProps> = ({ children, uid }) => {
-	const { getPosition, dispatch, ref } = useContext(GraphContext);
+const Node : React.FC<NodeProps> = ({ children, uid, dragged }) => {
+	const { getPosition } = useContext(GraphContext);
 	const { x, y } = getPosition!(uid);
-	const { dragged, onMouseDown } = useDraggable(ref, () => {
-		dispatch!(updatePosition(
-			uid,
-			x + dragged.x,
-			y + dragged.y,
-		));
-	});
 	const left = x + dragged.x;
 	const top =  y + dragged.y;
 
@@ -131,7 +125,6 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 		left: `${left}px`,
 		top: `${top}px`,
 	}}
-	onMouseDown={onMouseDown}
 	>
 	{children}
 	</div>
@@ -139,11 +132,29 @@ const Node : React.FC<NodeProps> = ({ children, uid }) => {
 
 export const useNode = () => {
 	const uid = useUID();
-	//const context = useContext(GraphContext);
+
+	// Dragable
+	const { getPosition, dispatch, ref } = useContext(GraphContext);
+	const { x, y } = getPosition!(uid);
+	const { dragged, onMouseDown } = useDraggable(ref, () => {
+		dispatch!(updatePosition(
+			uid,
+			x + dragged.x,
+			y + dragged.y,
+		));
+	});
+
+	const Draggable : React.FC<{ uid: Uid }> = ({ children }) => {
+		return <div onMouseDown={onMouseDown}>
+		{children}
+		</div>
+	};
+
 
 	return {
 		uid,
-		Node: ({ ...args }) => <Node uid={uid} {...args} />,
+		Node: ({ ...args }) => <Node uid={uid} dragged={dragged} {...args} />,
+		Draggable: ({ ...args }) => <Draggable uid={uid} {...args} />,
 		//setData: (key, value) => 
 	};
 }
