@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useReducer, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useRef, useEffect, useState } from 'react';
 import { useUID } from 'react-uid';
 import useDraggable from './useDraggable';
 import BackgroundGraph from './backgroundgraph';
 
 type Uid = string;
 type Color = string;
+type Vector = { x: number, y: number };
 type RefType = { current: any }; // TODO: type this?
 
 interface Graph {
@@ -74,7 +75,20 @@ const GraphComponent : React.FC<GraphComponentProps> = ({
 	background = '#1c2e60'
 }) => {
 	const ref = useRef(null);
-	const [state, dispatch] = useReducer(graphReducer, initialState);
+	const [ state, dispatch ] = useReducer(graphReducer, initialState);
+	const [ _position, setPosition ] = useState({ x: 0, y: 0 });
+	const { dragged, onMouseDown } = useDraggable(ref, (dragged : Vector) => {
+		setPosition({
+			x: _position.x + dragged.x,
+			y: _position.y + dragged.y,
+		});
+	});
+
+	const position = {
+		x: _position.x + dragged.x,
+		y: _position.y + dragged.y,
+	};
+
 	const getPosition = (uid: Uid) => {
 		const node = state.nodes.find((node) => node.uid === uid);
 		const defaultValues = { x: 0, y: 0 };
@@ -96,14 +110,34 @@ const GraphComponent : React.FC<GraphComponentProps> = ({
 			overflow: 'hidden',
 		}}
 		ref={ref}
+		onMouseDown={onMouseDown}
 		>
+			<span style={{
+				position: 'absolute',
+				userSelect: 'none',
+			}}>{JSON.stringify(position)}</span>
 			<BackgroundGraph
 				height={height}
 				width={width}
 				vertical={[50, 10, 10, 10]}
 				horizontal={[50, 10, 10, 10]}
+				dragged={position}
 				/>
-			{children}
+			<div style={{
+				position: 'absolute',
+				width: '100%',
+				height: '100%',
+				left: `${position.x}px`,
+				top: `${position.y}px`,
+			}}>
+				<div style={{
+					position: 'relative',
+					width: '100%',
+					height: '100%',
+				}}>
+				{children}
+				</div>
+			</div>
 		</div>
 	</GraphContext.Provider>
 };

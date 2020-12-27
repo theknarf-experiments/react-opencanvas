@@ -27,6 +27,7 @@ const useDraggable = (ref: { current: any }, onDragDone : Function) => {
 	const onMouseDown = (e : React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		// Only drag on left click
 		if(e.button === 0) {
+			e.stopPropagation();
 			setDragging({
 				dragging: true,
 				initial: {

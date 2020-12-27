@@ -14,20 +14,21 @@ interface BackgroundGraphProps {
 	horizontal: number[];
 	width: number;
 	height: number;
+	dragged: { x: number, y: number };
 };
 
-const BackgroundGraph : React.FC<BackgroundGraphProps> = ({ vertical, horizontal, width, height }) => {
+const BackgroundGraph : React.FC<BackgroundGraphProps> = ({ vertical, horizontal, width, height, dragged }) => {
 	const viewBox = `0 0 ${width} ${height}`;
 	const sumVertical   = vertical.reduce((a,b) => a+b, 0);
 	const sumHorizontal = horizontal.reduce((a,b) => a+b, 0);
 
 	// Repeat horizontal and vertical lines until they fill the width and height
-	vertical   = repeatArray(vertical, width / sumVertical + 1)
-	horizontal = repeatArray(horizontal, height / sumHorizontal + 1)
+	vertical   = repeatArray(vertical, width / sumVertical);
+	horizontal = repeatArray(horizontal, height / sumHorizontal);
 
 	const verticalPath = vertical.reduce(
 		({x, pathCommand}, moveRightBy) => {
-			const newX = x+moveRightBy;
+			const newX = (x+moveRightBy + width) % width;
 			const newLine = `M${newX},0 V${height} `;
 
 			return {
@@ -35,12 +36,12 @@ const BackgroundGraph : React.FC<BackgroundGraphProps> = ({ vertical, horizontal
 				pathCommand: pathCommand+newLine
 			};
 		},
-		{x: 0, pathCommand: ''}
+		{x: dragged.x, pathCommand: ''}
 	).pathCommand;
 
 	const horizontalPath = horizontal.reduce(
 		({y, pathCommand}, moveDownBy) => {
-			const newY = y+moveDownBy;
+			const newY = (y+moveDownBy + height) % height;
 			const newLine = `M0,${newY} H${width} `;
 
 			return {
@@ -48,7 +49,7 @@ const BackgroundGraph : React.FC<BackgroundGraphProps> = ({ vertical, horizontal
 				pathCommand: pathCommand+newLine
 			};
 		},
-		{y: 0, pathCommand: ''}
+		{y: dragged.y, pathCommand: ''}
 	).pathCommand;
 
 	return <svg xmlns="http://www.w3.org/2000/svg" viewBox={viewBox}>
