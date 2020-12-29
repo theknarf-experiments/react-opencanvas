@@ -200,4 +200,25 @@ export const useNode = () => {
 	};
 }
 
+interface PortProps {
+	uid: Uid;
+	position: Vector;
+};
+
+const Port : React.FC<PortProps> = ({ children, uid, position  }) => {
+	
+	return <div>
+	{ children }
+	</div>;
+}
+
+export const usePort = (nodeUid: Uid) => {
+	const uid = useUID();
+	
+	return {
+		uid,
+		Port: ({ position, ...args } : { position: Vector } & any) => <Port uid={uid} {...args} />,
+	};
+}
+
 export default GraphComponent;

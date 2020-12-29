@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Graph, { useNode } from './graph';
+import Graph, { useNode, usePort } from './graph';
 
 const GenericNode1 : React.FC = () => {
 	const { Node, Draggable, uid } = useNode();	
@@ -22,6 +22,8 @@ const GenericNode2 : React.FC<{
 	onClose?: Function
 }> = ({ onClose }) => {
 	const { Node, Draggable, uid } = useNode();	
+	const { uid: portUid, Port } = usePort(uid);
+
 	const onClick = () => {
 		if(typeof onClose === 'function')
 			onClose();
@@ -30,6 +32,9 @@ const GenericNode2 : React.FC<{
 	return <Node>
 		<Draggable>
 			<div style={{ background: '#003' }}>
+				<div style={{ position: 'absolute', top: '-10px', left: '120px' }} >
+					<Port position={{ x: -10, y: 120 }}>{portUid}</Port>
+				</div>
 				<span>Uid: {uid}</span>
 				<div style={{ padding: '20px'}}>
 					generic node type 2	
