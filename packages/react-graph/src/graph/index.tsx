@@ -200,14 +200,56 @@ export const useNode = () => {
 	};
 }
 
+interface ArrowProps {
+	vector: Vector;
+};
+
+const Arrow : React.FC<ArrowProps> = ({ vector }) => {
+	const width = Math.abs(vector.x),
+				height = Math.abs(vector.y),
+				top = vector.y > 0 ? 0 : vector.y,
+				left = vector.x > 0 ? 0 : vector.x;
+
+	const origin = {
+		x: vector.x > 0 ? 0 : width,
+		y: vector.y > 0 ? 0 : height,
+	};
+
+	const d = `M ${origin.x} ${origin.y} l ${vector.x} ${vector.y}`;
+
+	return <div style={{
+		position: 'relative',
+	}}>
+		<div style={{
+			position: 'absolute',
+			width: `${width}px`,
+			height: `${height}px`,
+			top: `${top}px`,
+			left: `${left}px`,
+		}}>
+			<svg height={height} width={width}>
+				<path d={d} stroke="white" stroke-width="2" fill="none" />
+			</svg>
+		</div>
+	</div>
+};
+
 interface PortProps {
 	uid: Uid;
 	position: Vector;
 };
 
 const Port : React.FC<PortProps> = ({ children, uid, position  }) => {
+	const { ref } = useContext(GraphContext);
+	const { dragged, onMouseDown } = useDraggable(ref, (dragged: Vector) => {
+		
+	});
 	
-	return <div>
+	return <div onMouseDown={onMouseDown}>
+	{
+		(dragged.x !== 0 && dragged.y !== 0) &&
+			<Arrow vector={dragged} />
+	}
 	{ children }
 	</div>;
 }
