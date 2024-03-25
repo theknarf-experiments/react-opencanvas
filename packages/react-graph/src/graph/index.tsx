@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useRef, useEffect, useState } from 'react';
-import { useUID } from 'react-uid';
+import { useId } from 'react';
 import useDraggable from './useDraggable';
 import BackgroundGraph from './backgroundgraph';
 
@@ -190,7 +190,7 @@ const Node : React.FC<NodeProps> = ({ children, uid, nodeRef }) => {
 };
 
 export const useNode = () => {
-	const uid = useUID();
+	const uid = useId();
 	const nodeRef = useRef(null);
 
 	return {
@@ -255,7 +255,7 @@ const Port : React.FC<PortProps> = ({ children, uid, position  }) => {
 }
 
 export const usePort = (nodeUid: Uid) => {
-	const uid = useUID();
+	const uid = useId();
 	
 	return {
 		uid,
